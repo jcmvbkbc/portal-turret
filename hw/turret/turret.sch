@@ -1,0 +1,407 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Transistor_BJT:MJE13003 Q1
+U 1 1 64203701
+P 4150 1800
+F 0 "Q1" H 4342 1846 50  0000 L CNN
+F 1 "MJE3055" H 4342 1755 50  0000 L CNN
+F 2 "Package_TO_SOT_THT:TO-126-3_Vertical" H 4350 1725 50  0001 L CIN
+F 3 "http://www.onsemi.com/pub_link/Collateral/MJE13003-D.PDF" H 4150 1800 50  0001 L CNN
+	1    4150 1800
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:Speaker LS1
+U 1 1 6420517C
+P 4450 2100
+F 0 "LS1" H 4620 2096 50  0000 L CNN
+F 1 "Speaker" H 4620 2005 50  0000 L CNN
+F 2 "" H 4450 1900 50  0001 C CNN
+F 3 "~" H 4440 2050 50  0001 C CNN
+	1    4450 2100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4250 2000 4250 2100
+$Comp
+L power:GND #PWR?
+U 1 1 64205FD2
+P 4250 2300
+F 0 "#PWR?" H 4250 2050 50  0001 C CNN
+F 1 "GND" H 4255 2127 50  0000 C CNN
+F 2 "" H 4250 2300 50  0001 C CNN
+F 3 "" H 4250 2300 50  0001 C CNN
+	1    4250 2300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4250 2300 4250 2200
+$Comp
+L power:+5V #PWR?
+U 1 1 64206A51
+P 4250 1600
+F 0 "#PWR?" H 4250 1450 50  0001 C CNN
+F 1 "+5V" H 4265 1773 50  0000 C CNN
+F 2 "" H 4250 1600 50  0001 C CNN
+F 3 "" H 4250 1600 50  0001 C CNN
+	1    4250 1600
+	1    0    0    -1  
+$EndComp
+$Comp
+L esp32:ESP-WROOM-32module U1
+U 1 1 6420B803
+P 2400 2550
+F 0 "U1" H 2400 3725 50  0000 C CNN
+F 1 "ESP-WROOM-32module" H 2400 3634 50  0000 C CNN
+F 2 "" H 2400 3150 50  0001 C CNN
+F 3 "" H 2400 3150 50  0001 C CNN
+	1    2400 2550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Switch:SW_Push SW1
+U 1 1 64210CCF
+P 3650 1800
+F 0 "SW1" H 3650 2085 50  0000 C CNN
+F 1 "SW_Push" H 3650 1994 50  0000 C CNN
+F 2 "" H 3650 2000 50  0001 C CNN
+F 3 "~" H 3650 2000 50  0001 C CNN
+	1    3650 1800
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 64211520
+P 3850 1900
+F 0 "#PWR?" H 3850 1650 50  0001 C CNN
+F 1 "GND" H 3855 1727 50  0000 C CNN
+F 2 "" H 3850 1900 50  0001 C CNN
+F 3 "" H 3850 1900 50  0001 C CNN
+	1    3850 1900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3850 1900 3850 1800
+$Comp
+L Motor:Motor_Servo M1
+U 1 1 6422944F
+P 5700 1900
+F 0 "M1" H 6032 1965 50  0000 L CNN
+F 1 "Motor_Servo wingturn" H 6032 1874 50  0000 L CNN
+F 2 "" H 5700 1710 50  0001 C CNN
+F 3 "http://forums.parallax.com/uploads/attachments/46831/74481.png" H 5700 1710 50  0001 C CNN
+	1    5700 1900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Motor:Motor_Servo M2
+U 1 1 6422B099
+P 5700 2350
+F 0 "M2" H 6032 2415 50  0000 L CNN
+F 1 "Motor_Servo wingspan" H 6032 2324 50  0000 L CNN
+F 2 "" H 5700 2160 50  0001 C CNN
+F 3 "http://forums.parallax.com/uploads/attachments/46831/74481.png" H 5700 2160 50  0001 C CNN
+	1    5700 2350
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 6422B984
+P 5300 2550
+F 0 "#PWR?" H 5300 2300 50  0001 C CNN
+F 1 "GND" H 5305 2377 50  0000 C CNN
+F 2 "" H 5300 2550 50  0001 C CNN
+F 3 "" H 5300 2550 50  0001 C CNN
+	1    5300 2550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5300 2550 5300 2450
+Wire Wire Line
+	5300 2450 5400 2450
+Wire Wire Line
+	5300 2450 5300 2000
+Wire Wire Line
+	5300 2000 5400 2000
+Connection ~ 5300 2450
+$Comp
+L power:+5V #PWR?
+U 1 1 6422CDB9
+P 5200 1700
+F 0 "#PWR?" H 5200 1550 50  0001 C CNN
+F 1 "+5V" H 5215 1873 50  0000 C CNN
+F 2 "" H 5200 1700 50  0001 C CNN
+F 3 "" H 5200 1700 50  0001 C CNN
+	1    5200 1700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5200 1700 5200 1900
+Wire Wire Line
+	5200 1900 5400 1900
+Wire Wire Line
+	5200 1900 5200 2350
+Wire Wire Line
+	5200 2350 5400 2350
+Connection ~ 5200 1900
+Wire Wire Line
+	1950 2700 1800 2700
+Wire Wire Line
+	1950 2800 1700 2800
+Wire Wire Line
+	1950 2600 1600 2600
+Wire Wire Line
+	1800 2300 1950 2300
+Wire Wire Line
+	1700 2100 1950 2100
+Wire Wire Line
+	1600 1050 5100 1050
+Wire Wire Line
+	1600 2200 1950 2200
+Wire Wire Line
+	5100 1800 5100 1050
+Wire Wire Line
+	5100 1800 5400 1800
+Wire Wire Line
+	5000 2250 5000 1150
+Wire Wire Line
+	5000 2250 5400 2250
+Wire Wire Line
+	1700 1150 5000 1150
+$Comp
+L helpers:GY291module U2
+U 1 1 64208805
+P 4100 3650
+F 0 "U2" H 4378 3701 50  0000 L CNN
+F 1 "GY291module" H 4378 3610 50  0000 L CNN
+F 2 "" H 4100 3700 50  0001 C CNN
+F 3 "" H 4100 3700 50  0001 C CNN
+	1    4100 3650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3050 2200 2850 2200
+Wire Wire Line
+	3150 2100 2850 2100
+$Comp
+L power:+3.3V #PWR?
+U 1 1 6420E29C
+P 3600 3300
+F 0 "#PWR?" H 3600 3150 50  0001 C CNN
+F 1 "+3.3V" H 3615 3473 50  0000 C CNN
+F 2 "" H 3600 3300 50  0001 C CNN
+F 3 "" H 3600 3300 50  0001 C CNN
+	1    3600 3300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3750 3800 3600 3800
+Wire Wire Line
+	3600 3800 3600 3700
+Wire Wire Line
+	3750 3700 3600 3700
+Connection ~ 3600 3700
+$Comp
+L power:GND #PWR?
+U 1 1 64210F0B
+P 3600 4000
+F 0 "#PWR?" H 3600 3750 50  0001 C CNN
+F 1 "GND" H 3605 3827 50  0000 C CNN
+F 2 "" H 3600 4000 50  0001 C CNN
+F 3 "" H 3600 4000 50  0001 C CNN
+	1    3600 4000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3750 3900 3600 3900
+$Comp
+L helpers:AM312module U3
+U 1 1 64214478
+P 3650 2600
+F 0 "U3" H 3828 2651 50  0000 L CNN
+F 1 "AM312module" H 3828 2560 50  0000 L CNN
+F 2 "" H 3650 2600 50  0001 C CNN
+F 3 "" H 3650 2600 50  0001 C CNN
+	1    3650 2600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2850 1600 3350 1600
+Wire Wire Line
+	3400 2600 3250 2600
+Wire Wire Line
+	3250 2600 3250 1700
+Wire Wire Line
+	3250 1700 2850 1700
+$Comp
+L power:+5V #PWR?
+U 1 1 64221329
+P 3350 2400
+F 0 "#PWR?" H 3350 2250 50  0001 C CNN
+F 1 "+5V" H 3365 2573 50  0000 C CNN
+F 2 "" H 3350 2400 50  0001 C CNN
+F 3 "" H 3350 2400 50  0001 C CNN
+	1    3350 2400
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 6422191E
+P 3350 2800
+F 0 "#PWR?" H 3350 2550 50  0001 C CNN
+F 1 "GND" H 3355 2627 50  0000 C CNN
+F 2 "" H 3350 2800 50  0001 C CNN
+F 3 "" H 3350 2800 50  0001 C CNN
+	1    3350 2800
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3400 2500 3350 2500
+Wire Wire Line
+	3350 2500 3350 2400
+Wire Wire Line
+	3400 2700 3350 2700
+Wire Wire Line
+	3350 2700 3350 2800
+Wire Wire Line
+	3350 1600 3350 1800
+Wire Wire Line
+	3350 1800 3450 1800
+Wire Wire Line
+	1800 2300 1800 1250
+Wire Wire Line
+	1600 1050 1600 2200
+Wire Wire Line
+	1600 2600 1600 4250
+Wire Wire Line
+	1700 2800 1700 3850
+Wire Wire Line
+	1800 3450 1900 3450
+Wire Wire Line
+	1800 2700 1800 3450
+Wire Wire Line
+	1900 4250 1600 4250
+Wire Wire Line
+	1900 3850 1700 3850
+Connection ~ 2950 3850
+Wire Wire Line
+	2950 3850 2950 3450
+Connection ~ 2950 4250
+Wire Wire Line
+	2950 3850 2700 3850
+Wire Wire Line
+	2950 4250 2950 3850
+Wire Wire Line
+	2950 4250 2700 4250
+Wire Wire Line
+	2950 4350 2950 4250
+$Comp
+L power:GND #PWR?
+U 1 1 64217E35
+P 2950 4350
+F 0 "#PWR?" H 2950 4100 50  0001 C CNN
+F 1 "GND" H 2955 4177 50  0000 C CNN
+F 2 "" H 2950 4350 50  0001 C CNN
+F 3 "" H 2950 4350 50  0001 C CNN
+	1    2950 4350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2200 4250 2400 4250
+Wire Wire Line
+	2200 3850 2400 3850
+$Comp
+L Device:LED D5
+U 1 1 642176FC
+P 2550 4250
+F 0 "D5" H 2543 3995 50  0000 C CNN
+F 1 "LED" H 2543 4086 50  0000 C CNN
+F 2 "" H 2550 4250 50  0001 C CNN
+F 3 "~" H 2550 4250 50  0001 C CNN
+	1    2550 4250
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:LED D4
+U 1 1 64217295
+P 2050 4250
+F 0 "D4" H 2043 3995 50  0000 C CNN
+F 1 "LED" H 2043 4086 50  0000 C CNN
+F 2 "" H 2050 4250 50  0001 C CNN
+F 3 "~" H 2050 4250 50  0001 C CNN
+	1    2050 4250
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:LED D3
+U 1 1 64216CAC
+P 2550 3850
+F 0 "D3" H 2543 3595 50  0000 C CNN
+F 1 "LED" H 2543 3686 50  0000 C CNN
+F 2 "" H 2550 3850 50  0001 C CNN
+F 3 "~" H 2550 3850 50  0001 C CNN
+	1    2550 3850
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:LED D2
+U 1 1 64215029
+P 2050 3850
+F 0 "D2" H 2043 3595 50  0000 C CNN
+F 1 "LED" H 2043 3686 50  0000 C CNN
+F 2 "" H 2050 3850 50  0001 C CNN
+F 3 "~" H 2050 3850 50  0001 C CNN
+	1    2050 3850
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:LED D1
+U 1 1 64212CAF
+P 2050 3450
+F 0 "D1" H 2043 3195 50  0000 C CNN
+F 1 "LED" H 2043 3286 50  0000 C CNN
+F 2 "" H 2050 3450 50  0001 C CNN
+F 3 "~" H 2050 3450 50  0001 C CNN
+	1    2050 3450
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	3950 1800 3950 1250
+Wire Wire Line
+	3950 1250 1800 1250
+Wire Wire Line
+	1700 2100 1700 1150
+Wire Wire Line
+	3600 3300 3600 3600
+Wire Wire Line
+	3750 3600 3600 3600
+Wire Wire Line
+	3600 3900 3600 4000
+Wire Wire Line
+	2950 3450 2200 3450
+Wire Wire Line
+	3150 2100 3150 3400
+Wire Wire Line
+	3150 3400 3750 3400
+Wire Wire Line
+	3050 2200 3050 3500
+Wire Wire Line
+	3050 3500 3750 3500
+Connection ~ 3600 3600
+Wire Wire Line
+	3600 3600 3600 3700
+$EndSCHEMATC
