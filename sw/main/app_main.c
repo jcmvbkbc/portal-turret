@@ -11,7 +11,7 @@
 #include "wings.h"
 
 #define GPIO_PIR	22
-#define GPIO_LASER	12
+#define GPIO_LASER	14
 
 static bool mount_fatfs(const char* partition_label)
 {

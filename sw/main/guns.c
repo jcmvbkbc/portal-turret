@@ -3,8 +3,8 @@
 #include "guns.h"
 #include "player.h"
 
-#define GPIO_LGUNS	13
-#define GPIO_RGUNS	14
+#define GPIO_LGUNS	12
+#define GPIO_RGUNS	13
 
 struct gun_struct {
 	enum {

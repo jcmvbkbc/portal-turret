@@ -3,8 +3,8 @@
 
 #include "accel.h"
 
-#define I2C_MASTER_SCL_IO		19
-#define I2C_MASTER_SDA_IO		18
+#define I2C_MASTER_SCL_IO		21
+#define I2C_MASTER_SDA_IO		19
 #define I2C_MASTER_NUM			0
 #define I2C_MASTER_FREQ_HZ		400000
 #define I2C_MASTER_TX_BUF_DISABLE	0
@@ -27,6 +27,7 @@
 #define ADXL345_DATA_REG		0x32
 
 #define N_DIFF	16
+#define ACCEL_G_Z			(-300)
 
 struct output_struct {
 	int16_t x;
@@ -138,7 +139,7 @@ bool accel_uneven(void)
 {
 	int dx = accel.prev.x;
 	int dy = accel.prev.y;
-	int dz = accel.prev.z - 300;
+	int dz = accel.prev.z - ACCEL_G_Z;
 
 	return (dx * dx + dy * dy + dz * dz) > 20000;
 }
