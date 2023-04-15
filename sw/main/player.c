@@ -25,6 +25,13 @@
 //I2S channel number
 #define PLAYER_I2S_CHANNEL_NUM	((PLAYER_I2S_FORMAT < I2S_CHANNEL_FMT_ONLY_RIGHT) ? (2) : (1))
 
+#define PLAYER_LOGIC_MIN	(-128)
+#define PLAYER_LOGIC_MAX	(127)
+
+#define PLAYER_MASTER_RANGE	256
+#define PLAYER_MASTER_OFFSET	(40)
+#define PLAYER_MASTER_VOLUME	(PLAYER_MASTER_RANGE - PLAYER_MASTER_OFFSET)
+
 /**
  * @brief I2S DAC mode init.
  */
@@ -50,15 +57,17 @@ static void player_i2s_init(void)
 
 static int player_i2s_dac_sample_scale(uint8_t *buf, int sample)
 {
+	sample = (PLAYER_MASTER_VOLUME * sample) / PLAYER_MASTER_RANGE +
+		PLAYER_MASTER_OFFSET;
 #if (PLAYER_I2S_SAMPLE_BITS == 16)
 	buf[0] = 0;
-	buf[1] = (215 * sample) / 256 + 40;
+	buf[1] = sample;
 	return 2;
 #else
 	buf[0] = 0;
 	buf[1] = 0;
 	buf[2] = 0;
-	buf[3] = (215 * sample) / 256 + 40;
+	buf[3] = sample;
 	return 4;
 #endif
 }
@@ -139,12 +148,13 @@ static int player_mix(uint8_t *buf, struct player_stream_struct *stm)
 			if (offset < stream->size)
 				v += stream->buf[i];
 		}
-		if (v > 127)
-			v = 127;
-		else if (v < -128)
-			v = -128;
+		if (v > PLAYER_LOGIC_MAX)
+			v = PLAYER_LOGIC_MAX;
+		else if (v < PLAYER_LOGIC_MIN)
+			v = PLAYER_LOGIC_MIN;
 
-		off += player_i2s_dac_sample_scale(buf + off, v + 128);
+		off += player_i2s_dac_sample_scale(buf + off,
+						   v - PLAYER_LOGIC_MIN);
 	}
 
 	for (stream = stm; stream; stream = stream->next) {
