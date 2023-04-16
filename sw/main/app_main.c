@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "driver/gpio.h"
 #include "esp_err.h"
 #include "esp_vfs.h"
@@ -12,6 +14,8 @@
 
 #define GPIO_PIR	22
 #define GPIO_LASER	14
+
+#define RANDOM_CHANCE(p)	(random() < (long)((p) * 0x7fffffff))
 
 static bool mount_fatfs(const char* partition_label)
 {
@@ -101,6 +105,15 @@ static void turret_close_stream(void **stream)
 	}
 }
 
+static void turret_play_one_of(void **stream, const char * const name[])
+{
+	int i;
+
+	for (i = 0; name[i]; ++i);
+	turret_close_stream(stream);
+	*stream = player_play(name[random() % i]);
+}
+
 static void stable_tick(struct stable_struct *stable)
 {
 	bool target_detected = pir_target_detected();
@@ -120,7 +133,7 @@ static void stable_tick(struct stable_struct *stable)
 		break;
 
 	case STATE_OPENING:
-		if (!stable->stream) {
+		if (!stable->stream && wings_opened()) {
 			stable->state = STATE_FIRING;
 			ESP_LOGI(__func__, "firing\n");
 			guns_fire(true);
@@ -142,24 +155,52 @@ static void stable_tick(struct stable_struct *stable)
 			ESP_LOGI(__func__, "firing\n");
 			guns_fire(true);
 		} else if (stable->ticks > 100) {
-			stable->state = STATE_LOST;
-			ESP_LOGI(__func__, "lost\n");
 			wings_scan(true);
-			stable->stream = player_play("/audio/07/002_search.mp3.s8");
+			stable->ticks = 0;
+			if (RANDOM_CHANCE(0.7)) {
+				stable->state = STATE_LOST;
+				ESP_LOGI(__func__, "lost\n");
+				/* are you still there? */
+				turret_play_one_of(&stable->stream,
+						   (const char * const []){
+						   "/audio/07/002_search.mp3.s8",
+						   "/audio/07/005_search.mp3.s8",
+						   "/audio/07/006_autosearch.mp3.s8",
+						   "/audio/07/010_autosearch.mp3.s8",
+						   NULL,
+						   });
+			}
 		}
 		break;
 
 	case STATE_LOST:
 		if (target_detected) {
-			turret_close_stream(&stable->stream);
+			if (!stable->stream) {
+				/* there you are */
+				turret_play_one_of(&stable->stream,
+						   (const char * const []){
+						   "/audio/01/002_active.mp3.s8",
+						   "/audio/01/007_active.mp3.s8",
+						   "/audio/01/008_active.mp3.s8",
+						   NULL,
+						   });
+			}
 			stable->state = STATE_FIRING;
 			ESP_LOGI(__func__, "firing\n");
 			wings_scan(false);
 			guns_fire(true);
 		} else if (!stable->stream) {
-			stable->state = STATE_ABOUT_TO_CLOSE;
-			ESP_LOGI(__func__, "about to close\n");
-			stable->ticks = 0;
+			if (stable->ticks > 100) {
+				stable->ticks = 0;
+				if (RANDOM_CHANCE(0.2)) {
+					stable->state = STATE_ABOUT_TO_CLOSE;
+					ESP_LOGI(__func__, "about to close\n");
+				}
+				if (RANDOM_CHANCE(0.1)) {
+					stable->state = STATE_LOSING;
+					ESP_LOGI(__func__, "losing\n");
+				}
+			}
 		}
 		break;
 
@@ -173,7 +214,15 @@ static void stable_tick(struct stable_struct *stable)
 			stable->state = STATE_CLOSING;
 			ESP_LOGI(__func__, "closing\n");
 			wings_open(false);
-			stable->stream = player_play("/audio/07/003_search.mp3.s8");
+			/* hibernating */
+			turret_play_one_of(&stable->stream,
+					   (const char * const []){
+					   "/audio/07/003_search.mp3.s8",
+					   "/audio/06/001_retire.mp3.s8",
+					   "/audio/06/002_retire.mp3.s8",
+					   "/audio/06/003_retire.mp3.s8",
+					   NULL,
+					   });
 		}
 		break;
 
@@ -212,7 +261,16 @@ static void turret_tick(struct turret_struct *turret)
 			turret->state = STATE_UNSTABLE;
 			ESP_LOGI(__func__, "unstable\n");
 			turret_close_stream(&turret->stable.stream);
-			turret->stream = player_play("/audio/05/001_pickup.mp3.s8");
+			/* put me down */
+			turret_play_one_of(&turret->stream,
+					   (const char * const []){
+					   "/audio/05/001_pickup.mp3.s8",
+					   "/audio/05/005_pickup.mp3.s8",
+					   "/audio/05/006_pickup.mp3.s8",
+					   "/audio/05/007_pickup.mp3.s8",
+					   "/audio/05/008_pickup.mp3.s8",
+					   NULL,
+					   });
 		}
 		break;
 
@@ -225,7 +283,15 @@ static void turret_tick(struct turret_struct *turret)
 				wings_open(false);
 				laser_on(false);
 				turret->stable.state = STATE_SEARCH;
-				turret->stream = player_play("/audio/08/003_tipped.mp3.s8");
+				/* critical error */
+				turret_play_one_of(&turret->stream,
+						   (const char * const []){
+						   "/audio/08/003_tipped.mp3.s8",
+						   "/audio/08/001_tipped.mp3.s8",
+						   "/audio/04/003_disabled.mp3.s8",
+						   "/audio/04/008_disabled.mp3.s8",
+						   NULL,
+						   });
 				turret->ticks = 0;
 			} else {
 				turret->state = STATE_STABLE;
@@ -233,8 +299,18 @@ static void turret_tick(struct turret_struct *turret)
 			}
 		} else if (accel_unstable()) {
 			turret->ticks %= 0x20;
-			if (!turret->stream)
-				turret->stream = player_play("/audio/05/001_pickup.mp3.s8");
+			if (!turret->stream && RANDOM_CHANCE(0.3)) {
+				/* put me down */
+				turret_play_one_of(&turret->stream,
+						   (const char * const []){
+						   "/audio/05/001_pickup.mp3.s8",
+						   "/audio/05/005_pickup.mp3.s8",
+						   "/audio/05/006_pickup.mp3.s8",
+						   "/audio/05/007_pickup.mp3.s8",
+						   "/audio/05/008_pickup.mp3.s8",
+						   NULL,
+						   });
+			}
 		}
 		break;
 
