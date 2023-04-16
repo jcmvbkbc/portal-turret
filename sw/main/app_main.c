@@ -83,6 +83,11 @@ enum {
 	STATE_CLOSING,
 };
 
+enum {
+	TRANSITION_NONE,
+	TRANSITION_FIRING,
+};
+
 struct stable_struct {
 	int state;
 	void *stream;
@@ -118,6 +123,7 @@ static void turret_play_one_of(void **stream, const char * const name[])
 static void stable_tick(struct stable_struct *stable)
 {
 	bool target_detected = pir_target_detected();
+	int transition = TRANSITION_NONE;
 
 	if (stable->stream && !player_is_playing(stable->stream))
 		turret_close_stream(&stable->stream);
@@ -152,9 +158,7 @@ static void stable_tick(struct stable_struct *stable)
 
 	case STATE_LOSING:
 		if (target_detected) {
-			stable->state = STATE_FIRING;
-			ESP_LOGI(__func__, "firing\n");
-			guns_fire(true);
+			transition = TRANSITION_FIRING;
 		} else if (stable->ticks > 100) {
 			wings_scan(true);
 			stable->ticks = 0;
@@ -176,20 +180,7 @@ static void stable_tick(struct stable_struct *stable)
 
 	case STATE_LOST:
 		if (target_detected) {
-			if (!stable->stream) {
-				/* there you are */
-				turret_play_one_of(&stable->stream,
-						   (const char * const []){
-						   "/audio/01/002_active.mp3.s8",
-						   "/audio/01/007_active.mp3.s8",
-						   "/audio/01/008_active.mp3.s8",
-						   NULL,
-						   });
-			}
-			stable->state = STATE_FIRING;
-			ESP_LOGI(__func__, "firing\n");
-			wings_scan(false);
-			guns_fire(true);
+			transition = TRANSITION_FIRING;
 		} else if (!stable->stream) {
 			if (stable->ticks > 100) {
 				stable->ticks = 0;
@@ -207,10 +198,7 @@ static void stable_tick(struct stable_struct *stable)
 
 	case STATE_ABOUT_TO_CLOSE:
 		if (target_detected) {
-			stable->state = STATE_FIRING;
-			ESP_LOGI(__func__, "firing\n");
-			wings_scan(false);
-			guns_fire(true);
+			transition = TRANSITION_FIRING;
 		} else if (stable->ticks > 100) {
 			stable->state = STATE_CLOSING;
 			ESP_LOGI(__func__, "closing\n");
@@ -235,6 +223,25 @@ static void stable_tick(struct stable_struct *stable)
 		break;
 	}
 	++stable->ticks;
+
+	switch (transition) {
+	case TRANSITION_FIRING:
+		if (!stable->stream) {
+			/* there you are */
+			turret_play_one_of(&stable->stream,
+					   (const char * const []){
+					   "/audio/01/002_active.mp3.s8",
+					   "/audio/01/007_active.mp3.s8",
+					   "/audio/01/008_active.mp3.s8",
+					   NULL,
+					   });
+		}
+		stable->state = STATE_FIRING;
+		ESP_LOGI(__func__, "firing\n");
+		wings_scan(false);
+		guns_fire(true);
+		break;
+	}
 }
 
 static void turret_tick(struct turret_struct *turret)
