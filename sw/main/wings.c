@@ -13,9 +13,11 @@
 #define TIMER_WINGSPAN		MCPWM_TIMER_0
 
 #define WINGSPAN_NEUTRAL	0
-#define WINGSPAN_OPEN_START	1300
-#define WINGSPAN_OPEN_END	1000
-#define WINGSPAN_CLOSE		2000
+#define WINGSPAN_RAMP_TIME	MS_TO_TICKS(2000)
+#define WINGSPAN_OPEN_START	1400
+#define WINGSPAN_OPEN_END	1200
+#define WINGSPAN_CLOSE_START	1500
+#define WINGSPAN_CLOSE_END	1600
 
 #define GPIO_WINGTURN		33
 #define CHANNEL_WINGTURN	MCPWM1A
@@ -28,8 +30,8 @@
 #define WINGTURN_RANGE		128
 
 #define MS_TO_TICKS(ms)		((ms) / 10)
-#define TICKS_OPENING		MS_TO_TICKS(1000)
-#define TICKS_OPENING_DEAD	MS_TO_TICKS(500)
+#define TICKS_OPENING		MS_TO_TICKS(1700)
+#define TICKS_OPENING_DEAD	MS_TO_TICKS(800)
 #define TICKS_CENTERING		MS_TO_TICKS(1000)
 #define TICKS_CLOSE_TIMEOUT	MS_TO_TICKS(5000)
 
@@ -85,10 +87,16 @@ static void servo_set_duty(int timer, int us)
 	mcpwm_set_duty_in_us(MCPWM_UNIT_0, timer, MCPWM_OPR_A, us);
 }
 
+static int interpolate(int t, int dt, int start, int end)
+{
+	return t < dt ? (start * (dt - t) + end * t) / dt : end;
+}
+
 static void wings_set_turn(void)
 {
-	servo_set_duty(TIMER_WINGTURN, WINGTURN_LEFT +
-		       (WINGTURN_RIGHT - WINGTURN_LEFT) * wings.angle / WINGTURN_RANGE);
+	servo_set_duty(TIMER_WINGTURN,
+		       interpolate(wings.angle, WINGTURN_RANGE,
+				   WINGTURN_LEFT, WINGTURN_RIGHT));
 }
 
 static void wings_broken(void)
@@ -110,7 +118,7 @@ static void wings_closing(void)
 		wings.tick = 0;
 	} else {
 		wings.state = STATE_CLOSING;
-		servo_set_duty(TIMER_WINGSPAN, WINGSPAN_CLOSE);
+		servo_set_duty(TIMER_WINGSPAN, WINGSPAN_CLOSE_START);
 		wings.tick = 0;
 	}
 }
@@ -162,8 +170,8 @@ void wings_tick(void)
 	case STATE_OPENING:
 		++wings.tick;
 		servo_set_duty(TIMER_WINGSPAN,
-			       WINGSPAN_OPEN_START - wings.tick < WINGSPAN_OPEN_END ?
-			       WINGSPAN_OPEN_END : WINGSPAN_OPEN_START - wings.tick);
+			       interpolate(wings.tick, WINGSPAN_RAMP_TIME,
+					   WINGSPAN_OPEN_START, WINGSPAN_OPEN_END));
 		if (wings.target == STATE_CLOSED) {
 			wings_closing();
 		} else if (wings.tick >= TICKS_OPENING_DEAD && wings_closed()) {
@@ -195,12 +203,16 @@ void wings_tick(void)
 			wings.state = wings.target;
 		} else if (++wings.tick >= TICKS_CENTERING) {
 			wings.state = STATE_CLOSING;
-			servo_set_duty(TIMER_WINGSPAN, WINGSPAN_CLOSE);
+			servo_set_duty(TIMER_WINGSPAN, WINGSPAN_CLOSE_START);
 			wings.tick = 0;
 		}
 		break;
 
 	case STATE_CLOSING:
+		++wings.tick;
+		servo_set_duty(TIMER_WINGSPAN,
+			       interpolate(wings.tick, WINGSPAN_RAMP_TIME,
+					   WINGSPAN_CLOSE_START, WINGSPAN_CLOSE_END));
 		if (wings_closed()) {
 			wings.state = STATE_CLOSED;
 			servo_set_duty(TIMER_WINGSPAN, WINGSPAN_NEUTRAL);
