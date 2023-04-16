@@ -113,9 +113,7 @@ static void wings_closing(void)
 	} else if (wings_opened()) {
 		wings.state = STATE_CENTERING;
 		servo_set_duty(TIMER_WINGSPAN, WINGSPAN_NEUTRAL);
-		wings.angle = WINGTURN_RANGE / 2;
 		wings_set_turn();
-		wings.tick = 0;
 	} else {
 		wings.state = STATE_CLOSING;
 		servo_set_duty(TIMER_WINGSPAN, WINGSPAN_CLOSE_START);
@@ -130,6 +128,7 @@ void wings_init(void)
 	servo_set_duty(TIMER_WINGSPAN, WINGSPAN_NEUTRAL);
 	servo_set_duty(TIMER_WINGTURN, WINGTURN_CENTER);
 	end_switch_init();
+	wings.angle = WINGTURN_RANGE / 2;
 	wings.scan_direction = -1;
 	wings_closing();
 }
@@ -201,10 +200,16 @@ void wings_tick(void)
 	case STATE_CENTERING:
 		if (wings.target == STATE_OPEN) {
 			wings.state = wings.target;
-		} else if (++wings.tick >= TICKS_CENTERING) {
+		} else if (wings.angle == WINGTURN_RANGE / 2) {
 			wings.state = STATE_CLOSING;
 			servo_set_duty(TIMER_WINGSPAN, WINGSPAN_CLOSE_START);
 			wings.tick = 0;
+		} else {
+			if (wings.angle > WINGTURN_RANGE / 2)
+				--wings.angle;
+			else
+				++wings.angle;
+			wings_set_turn();
 		}
 		break;
 
