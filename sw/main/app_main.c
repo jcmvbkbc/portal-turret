@@ -284,8 +284,8 @@ static void turret_tick(struct turret_struct *turret)
 
 	case STATE_UNSTABLE:
 		laser_on(turret->ticks & 0x10);
-		if (turret->ticks > 100) {
-			if (accel_uneven()) {
+		if (accel_unstable()) {
+			if (accel_uneven() && turret->ticks > 100 && RANDOM_CHANCE(0.2)) {
 				turret->state = STATE_FALLEN;
 				ESP_LOGI(__func__, "fallen\n");
 				wings_open(false);
@@ -301,13 +301,7 @@ static void turret_tick(struct turret_struct *turret)
 						   NULL,
 						   });
 				turret->ticks = 0;
-			} else {
-				turret->state = STATE_STABLE;
-				ESP_LOGI(__func__, "stable\n");
-			}
-		} else if (accel_unstable()) {
-			turret->ticks %= 0x20;
-			if (!turret->stream && RANDOM_CHANCE(0.3)) {
+			} else if (!turret->stream && RANDOM_CHANCE(0.2)) {
 				/* put me down */
 				turret_play_one_of(&turret->stream,
 						   (const char * const []){
@@ -319,6 +313,9 @@ static void turret_tick(struct turret_struct *turret)
 						   NULL,
 						   });
 			}
+		} else if (turret->ticks > 100) {
+			turret->state = STATE_STABLE;
+			ESP_LOGI(__func__, "stable\n");
 		}
 		break;
 
