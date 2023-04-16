@@ -6,6 +6,12 @@
 #define GPIO_LGUNS	12
 #define GPIO_RGUNS	13
 
+#define TICKS_GUN_ON		4
+#define TICKS_GUN_OFF		3
+#define TICKS_BURST_PAUSE	22
+
+#define SHOTS_IN_BURST		4
+
 struct gun_struct {
 	enum {
 	       STATE_GUN_OFF,
@@ -40,8 +46,8 @@ static void gun_tick(struct gun_struct *gun)
 {
 	switch (gun->state) {
 	case STATE_GUN_ON:
-		if (++gun->tick >= 4) {
-			if (++gun->burst_count >= 4)
+		if (++gun->tick >= TICKS_GUN_ON) {
+			if (++gun->burst_count >= SHOTS_IN_BURST)
 				gun->state = STATE_GUN_BURST_PAUSE;
 			else
 				gun->state = STATE_GUN_OFF;
@@ -50,14 +56,14 @@ static void gun_tick(struct gun_struct *gun)
 		break;
 
 	case STATE_GUN_OFF:
-		if (++gun->tick >= 3) {
+		if (++gun->tick >= TICKS_GUN_OFF) {
 			gun->state = STATE_GUN_ON;
 			gun->tick = 0;
 		}
 		break;
 
 	case STATE_GUN_BURST_PAUSE:
-		if (++gun->tick >= 22) {
+		if (++gun->tick >= TICKS_BURST_PAUSE) {
 			gun->state = STATE_GUN_ON;
 			gun->burst_count = 0;
 			gun->tick = 0;
