@@ -26,8 +26,15 @@
 #define ADXL345_DATA_FORMAT_SELF_TEST		0x80
 #define ADXL345_DATA_REG		0x32
 
-#define N_DIFF	16
-#define ACCEL_G_Z			(-300)
+#define N_LOG				128
+#define ACCEL_G_Z			(-210)
+#define ACCEL_G_2			(ACCEL_G_Z * ACCEL_G_Z)
+
+struct p3d_struct {
+	int x;
+	int y;
+	int z;
+};
 
 struct output_struct {
 	int16_t x;
@@ -37,10 +44,10 @@ struct output_struct {
 
 struct accel_struct
 {
-	int diff;
-	int diff_log[N_DIFF];
-	int diff_idx;
-	struct output_struct prev;
+	int tick;
+	struct p3d_struct average;
+	struct output_struct log[N_LOG];
+	int log_idx;
 };
 
 static struct accel_struct accel;
@@ -103,43 +110,46 @@ void accel_init(void)
 		vTaskDelay(pdMS_TO_TICKS(10));
 		adxl345_register_read(ADXL345_DATA_REG, &o, sizeof(o));
 		ESP_LOGD(__func__, "x = %d, y = %d, z = %d\n", o.x, o.y, o.z);
-		accel.prev = o;
 	}
 }
 
 void accel_tick(void)
 {
 	struct output_struct o;
-	int diff;
-	int dx, dy, dz;
 
+	if (accel.tick < N_LOG)
+		++accel.tick;
 	adxl345_register_read(ADXL345_DATA_REG, &o, sizeof(o));
-	dx = o.x - accel.prev.x;
-	dy = o.y - accel.prev.y;
-	dz = o.z - accel.prev.z;
-	accel.prev = o;
-	diff = dx * dx + dy * dy + dz * dz;
-	accel.diff += diff - accel.diff_log[accel.diff_idx];
-	accel.diff_log[accel.diff_idx] = diff;
-	accel.diff_idx = (accel.diff_idx + 1) % N_DIFF;
-#if 0
-	if (accel_unstable())
-		ESP_LOGD(__func__, "diff = %d\n", accel.diff);
-	if (accel_uneven())
-		ESP_LOGD(__func__, "uneven\n");
-#endif
+	accel.average.x += o.x - accel.log[accel.log_idx].x;
+	accel.average.y += o.y - accel.log[accel.log_idx].y;
+	accel.average.z += o.z - accel.log[accel.log_idx].z;
+	accel.log[accel.log_idx] = o;
+	accel.log_idx = (accel.log_idx + 1) % N_LOG;
 }
 
+/* Average gravity vector length deviates from g by more than ~15% */
 bool accel_unstable(void)
 {
-	return accel.diff > 3000;
+	int dx = accel.average.x / N_LOG;
+	int dy = accel.average.y / N_LOG;
+	int dz = accel.average.z / N_LOG;
+
+	int diff = abs((dx * dx + dy * dy + dz * dz) - ACCEL_G_2);
+
+	if (accel.tick < N_LOG)
+		return false;
+
+	//ESP_LOGI(__func__, "%d, %d, %d, diff = %d", dx, dy, dz, diff);
+	return diff > ACCEL_G_2 / 32 || accel_uneven();
 }
 
+/* Gravity vector deviates from normal by more than 60 degrees */
 bool accel_uneven(void)
 {
-	int dx = accel.prev.x;
-	int dy = accel.prev.y;
-	int dz = accel.prev.z - ACCEL_G_Z;
+	int dx = accel.average.x / N_LOG;
+	int dy = accel.average.y / N_LOG;
+	int dz = accel.average.z / N_LOG - ACCEL_G_Z;
 
-	return (dx * dx + dy * dy + dz * dz) > 20000;
+	//ESP_LOGI(__func__, "%d, %d, %d", dx, dy, dz);
+	return (dx * dx + dy * dy + dz * dz) > ACCEL_G_Z * ACCEL_G_Z;
 }
