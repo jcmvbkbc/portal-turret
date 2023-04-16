@@ -216,7 +216,7 @@ static void stable_tick(struct stable_struct *stable)
 		break;
 
 	case STATE_CLOSING:
-		if (!stable->stream) {
+		if (!stable->stream && wings_closed()) {
 			ESP_LOGI(__func__, "search\n");
 			stable->state = STATE_SEARCH;
 		}
