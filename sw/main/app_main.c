@@ -2,6 +2,7 @@
 
 #include "driver/gpio.h"
 #include "esp_err.h"
+#include "esp_random.h"
 #include "esp_vfs.h"
 #include "esp_vfs_fat.h"
 #include "freertos/FreeRTOS.h"
@@ -328,6 +329,7 @@ static void turret_tick(struct turret_struct *turret)
 
 esp_err_t app_main(void)
 {
+	srand(esp_random());
 	mount_fatfs("storage");
 	laser_init();
 	player_init();
