@@ -1,0 +1,6 @@
+Origin: https://joranderaaff.nl/portal-sentry/
+https://github.com/joranderaaff/portalturret
+
+Software written from scratch for ESP32
+Schematics developed from scratch around ESP32 wrover
+IDF base: v4.4.1
